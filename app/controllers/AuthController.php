@@ -9,12 +9,12 @@ class AuthController extends Controller
     {
         parent::__construct();
 
-        // Start session FIRST
-        if (session_status() === PHP_SESSION_NONE) {
+        // Start session only if it has not started
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
             session_start();
         }
 
-        // Load database and model AFTER session
+        // Load database and model
         $this->call->database();
         $this->call->model('UserModel');
     }
@@ -58,6 +58,10 @@ class AuthController extends Controller
 
     public function logout()
     {
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            session_start();
+        }
+
         $_SESSION = [];
 
         if (ini_get('session.use_cookies')) {
