@@ -19,4 +19,5 @@ class UserController extends Controller {
         $data['users'] = $this->UserModel->all();
         $this->call->view('users/index', $data);
     }
+    
 }
