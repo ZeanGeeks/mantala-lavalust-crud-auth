@@ -1,11 +1,23 @@
 
 <?php
 
+// Start output buffering before anything else
+ob_start();
+
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 
 define('PREVENT_DIRECT_ACCESS', TRUE);
+
+/**
+ * ---------------------------------------------------------------
+ * START PHP SESSION
+ * ---------------------------------------------------------------
+ */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 /**
  * ------------------------------------------------------------------

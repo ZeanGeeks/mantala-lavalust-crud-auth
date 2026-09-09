@@ -17,10 +17,6 @@ class AuthController extends Controller
     // Show login page
     public function login()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         if (
             isset($_SESSION['logged_in']) &&
             $_SESSION['logged_in'] === true
@@ -35,11 +31,6 @@ class AuthController extends Controller
     // Process login
     public function authenticate()
     {
-        // Start session before using session data
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
 
@@ -74,7 +65,7 @@ class AuthController extends Controller
             return;
         }
 
-        // Create new session ID
+        // Regenerate session ID
         session_regenerate_id(true);
 
         // Save login information
@@ -90,11 +81,21 @@ class AuthController extends Controller
     // Logout
     public function logout()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         $_SESSION = [];
+
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
+            );
+        }
 
         session_destroy();
 
