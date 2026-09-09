@@ -24,17 +24,11 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  *
  * @package LavaLust
- * @author Ronald M. Marasigan <ronald.marasigan@yahoo.com>
+ * @author Ronald M. Marasigan
  * @since Version 1
- * @link https://github.com/ronmarasigan/LavaLust
- * @license https://opensource.org/licenses/MIT MIT License
  */
 
 /**
@@ -47,29 +41,46 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
 
 /** @var object $router */
 
+// HOME
 $router->get('/', 'Welcome::index');
 
+
+// STUDENT
 $router->get('/student', 'StudentController::index');
 
-$router->get('/student/profile', 'StudentController::profile', [
-    'middleware' => ['student']
-]);
+$router->get('/student/profile', 'StudentController::profile')
+      ->middleware('student');
 
+
+// USERS
 $router->get('/users', 'UserController::index');
 
 
-
-// PRODUCT CRUD ROUTES
 // PRODUCT CRUD ROUTES
 
-$router->get('/products', 'ProductController::index');
+$router->get('/products', 'ProductController::index')
+      ->middleware('auth');
 
-$router->get('/products/create', 'ProductController::create');
+$router->get('/products/create', 'ProductController::create')
+      ->middleware('auth');
 
-$router->post('/products/store', 'ProductController::store');
+$router->post('/products/store', 'ProductController::store')
+      ->middleware('auth');
 
-$router->get('/products/edit/{id}', 'ProductController::edit');
+$router->get('/products/edit/{id}', 'ProductController::edit')
+      ->middleware('auth');
 
-$router->post('/products/update/{id}', 'ProductController::update');
+$router->post('/products/update/{id}', 'ProductController::update')
+      ->middleware('auth');
 
-$router->get('/products/delete/{id}', 'ProductController::delete');
+$router->get('/products/delete/{id}', 'ProductController::delete')
+      ->middleware('auth');
+
+
+// AUTHENTICATION ROUTES
+
+$router->get('/login', 'AuthController::login');
+
+$router->post('/login/authenticate', 'AuthController::authenticate');
+
+$router->get('/logout', 'AuthController::logout');

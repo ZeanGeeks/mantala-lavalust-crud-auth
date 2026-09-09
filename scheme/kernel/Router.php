@@ -1,5 +1,8 @@
+
 <?php
+
 defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
+
 /**
  * ------------------------------------------------------------------
  * LavaLust - an opensource lightweight PHP MVC Framework
@@ -35,10 +38,11 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
  */
 
 /**
-* ------------------------------------------------------
-*  Class Router
-* ------------------------------------------------------
+ * ------------------------------------------------------
+ *  Class Router
+ * ------------------------------------------------------
  */
+
 class Router
 {
     /**
@@ -47,7 +51,7 @@ class Router
      * @var array
      */
     private $routes = [];
-    
+
     /**
      * Group middleware
      *
@@ -69,7 +73,6 @@ class Router
      */
     private $group_prefix = '';
 
-
     /**
      * Sanitize URL
      *
@@ -80,7 +83,6 @@ class Router
     {
         $url = rtrim($url, '/');
         $url = filter_var($url, FILTER_SANITIZE_URL);
-
         return $url;
     }
 
@@ -89,7 +91,7 @@ class Router
      *
      * @param string $url
      * @param mixed $callback
-     * @return void
+     * @return $this
      */
     public function get($url, $callback)
     {
@@ -102,7 +104,7 @@ class Router
      *
      * @param string $url
      * @param mixed $callback
-     * @return void
+     * @return $this
      */
     public function post($url, $callback)
     {
@@ -115,7 +117,7 @@ class Router
      *
      * @param string $url
      * @param mixed $callback
-     * @return void
+     * @return $this
      */
     public function put($url, $callback)
     {
@@ -128,7 +130,7 @@ class Router
      *
      * @param string $url
      * @param mixed $callback
-     * @return void
+     * @return $this
      */
     public function patch($url, $callback)
     {
@@ -141,7 +143,7 @@ class Router
      *
      * @param string $url
      * @param mixed $callback
-     * @return void
+     * @return $this
      */
     public function delete($url, $callback)
     {
@@ -154,7 +156,7 @@ class Router
      *
      * @param string $url
      * @param mixed $callback
-     * @return void
+     * @return $this
      */
     public function options($url, $callback)
     {
@@ -167,8 +169,8 @@ class Router
      *
      * @param string $url
      * @param mixed $callback
-     * @param string $methods
-     * @return void
+     * @param string|array $methods
+     * @return $this
      */
     public function match($url, $callback, $methods)
     {
@@ -186,9 +188,7 @@ class Router
     public function any($url, $callback)
     {
         $methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
-        
         $this->add_route($url, $callback, $methods);
-        
         return $this;
     }
 
@@ -197,14 +197,15 @@ class Router
      *
      * @param string $url
      * @param mixed $callback
-     * @param string $method
+     * @param string|array $method
+     * @param string|null $name
      * @return void
      */
     private function add_route($url, $callback, $method = 'GET', $name = NULL)
     {
-		if (strpos($url, '/') !== 0) {
-			$url = '/' . $url;
-		}
+        if (strpos($url, '/') !== 0) {
+            $url = '/' . $url;
+        }
 
         $methods = is_string($method)
             ? explode('|', strtoupper($method))
@@ -217,18 +218,22 @@ class Router
                 'method' => $http_method,
                 'name' => $name,
                 'constraints' => [],
-                'middleware' => array_merge($this->global_middleware, $this->group_middleware, []),
+                'middleware' => array_merge(
+                    $this->global_middleware,
+                    $this->group_middleware,
+                    []
+                ),
             ];
+
             $this->routes[] = $route;
         }
-
     }
 
     /**
      * Add global middleware
      *
      * @param mixed $middleware
-     * @return void
+     * @return $this
      */
     public function add_global_middleware($middleware)
     {
@@ -236,6 +241,7 @@ class Router
             $this->global_middleware,
             is_array($middleware) ? $middleware : [$middleware]
         );
+
         return $this;
     }
 
@@ -244,7 +250,7 @@ class Router
      *
      * @param mixed $options
      * @param callable $callback
-     * @return void
+     * @return $this
      */
     public function group($options, $callback)
     {
@@ -254,14 +260,18 @@ class Router
         // prefix
         if (isset($options['prefix'])) {
             $prefix = $options['prefix'];
-            if (strpos($prefix, '/') !== 0) $prefix = '/' . $prefix;
+
+            if (strpos($prefix, '/') !== 0) {
+                $prefix = '/' . $prefix;
+            }
+
             $this->group_prefix .= $prefix;
         }
 
         // middleware
         if (isset($options['middleware'])) {
-            $this->group_middleware = is_array($options['middleware']) 
-                ? $options['middleware'] 
+            $this->group_middleware = is_array($options['middleware'])
+                ? $options['middleware']
                 : [$options['middleware']];
         }
 
@@ -270,6 +280,8 @@ class Router
         // restore
         $this->group_prefix = $previous_group_prefix;
         $this->group_middleware = $previous_group_middleware;
+
+        return $this;
     }
 
     /**
@@ -291,9 +303,9 @@ class Router
 
         foreach ($segments as $segment) {
             if (preg_match('#^\{([a-zA-Z0-9_]+)(\?)?\}$#', $segment, $m)) {
-                $name     = $m[1];
+                $name = $m[1];
                 $optional = !empty($m[2]);
-                $capture  = $constraints[$name] ?? '[^/]+';
+                $capture = $constraints[$name] ?? '[^/]+';
 
                 $parts[] = $optional
                     ? '(?:/(' . $capture . '))?'
@@ -315,7 +327,11 @@ class Router
      */
     private function url_matches_route($url, $route)
     {
-        $pattern = $this->convert_to_regex_pattern($route['url'], $route['constraints']);
+        $pattern = $this->convert_to_regex_pattern(
+            $route['url'],
+            $route['constraints']
+        );
+
         return (bool) preg_match($pattern, $url);
     }
 
@@ -329,29 +345,38 @@ class Router
     private function call_controller_from_callback($callback, $matches)
     {
         if (is_array($callback) && count($callback) === 2) {
-            $controller = is_object($callback[0]) ? get_class($callback[0]) : $callback[0];
-            $method     = $callback[1];
+            $controller = is_object($callback[0])
+                ? get_class($callback[0])
+                : $callback[0];
 
-            // Strip namespace if fully qualified (e.g. App\Controllers\UserController → UserController)
+            $method = $callback[1];
+
+            // Strip namespace if fully qualified
+            // e.g. App\Controllers\UserController → UserController
             $controller = basename(str_replace('\\', '/', $controller));
 
             $controller_file = APP_DIR . 'controllers/' . ucfirst($controller) . '.php';
 
             if (!file_exists($controller_file)) {
-                throw new RuntimeException("Controller {$controller} does not exist.");
+                throw new RuntimeException(
+                    "Controller {$controller} does not exist."
+                );
             }
 
-            require_once($controller_file);
+            require_once $controller_file;
 
             $instance = new $controller();
 
             if (!method_exists($instance, $method)) {
-                throw new RuntimeException("Method {$controller}->{$method} does not exist.");
+                throw new RuntimeException(
+                    "Method {$controller}->{$method} does not exist."
+                );
             }
 
             call_user_func_array([$instance, $method], $matches);
             return;
         }
+
         if (is_string($callback)) {
             $controller = '';
             $method = 'index';
@@ -370,26 +395,28 @@ class Router
             $controller_file = APP_DIR . 'controllers/' . ucfirst($controller) . '.php';
 
             if (!file_exists($controller_file)) {
-                throw new RuntimeException("Controller {$controller} does not exist.");
+                throw new RuntimeException(
+                    "Controller {$controller} does not exist."
+                );
             }
 
-            require_once($controller_file);
+            require_once $controller_file;
 
             $instance = new $controller();
 
             if (!method_exists($instance, $method)) {
-                throw new RuntimeException("Method {$controller}->{$method} does not exist.");
+                throw new RuntimeException(
+                    "Method {$controller}->{$method} does not exist."
+                );
             }
 
             call_user_func_array([$instance, $method], $matches);
-
         } elseif (is_callable($callback)) {
             call_user_func_array($callback, array_values($matches));
         } else {
             throw new RuntimeException('Invalid callback.');
         }
     }
-
 
     /**
      * Execute callback for matched route
@@ -401,25 +428,42 @@ class Router
     private function execute_callback($url, $route)
     {
         $matches = [];
-        if (preg_match($this->convert_to_regex_pattern($route['url'], $route['constraints']), $url, $matches)) {
+
+        if (preg_match(
+            $this->convert_to_regex_pattern(
+                $route['url'],
+                $route['constraints']
+            ),
+            $url,
+            $matches
+        )) {
             array_shift($matches);
 
-            $callback    = $route['callback'];
+            $callback = $route['callback'];
             $middlewares = $route['middleware'] ?? [];
 
             if (!empty($middlewares)) {
-                $runner = load_class('Middleware', 'kernel'); // make sure kernel middleware class exists
-                $runner->run($middlewares, function () use ($callback, $matches) {
-                    $this->call_controller_from_callback($callback, $matches);
-                });
+                $runner = load_class(
+                    'Middleware',
+                    'kernel'
+                ); // make sure kernel middleware class exists
+
+                $runner->run(
+                    $middlewares,
+                    function () use ($callback, $matches) {
+                        $this->call_controller_from_callback(
+                            $callback,
+                            $matches
+                        );
+                    }
+                );
+
                 return;
             }
 
             $this->call_controller_from_callback($callback, $matches);
         }
     }
-
-
 
     /**
      * Initiate Request
@@ -433,6 +477,7 @@ class Router
         if (empty($url)) {
             $url = '/';
         }
+
         if (strpos($url, '/') !== 0) {
             $url = '/' . $url;
         }
@@ -440,25 +485,42 @@ class Router
         // Security check for permitted characters
         $url_segments = explode('/', $url);
         array_shift($url_segments);
-        foreach($url_segments as $uri)
-        {
-            if ($uri !== '' && ! preg_match('/^['.config_item('permitted_uri_chars').']+$/i', $uri))
-            {
+
+        foreach ($url_segments as $uri) {
+            if (
+                $uri !== '' &&
+                !preg_match(
+                    '/^[' . config_item('permitted_uri_chars') . ']+$/i',
+                    $uri
+                )
+            ) {
                 if (defined('IS_CLI') && IS_CLI) {
                     echo "Error 400: Disallowed characters in command.\n";
                     exit(1);
                 } else {
-                    show_error('400 Bad Request', 'The URI you submitted has disallowed characters.', 'error_general', 400);
+                    show_error(
+                        '400 Bad Request',
+                        'The URI you submitted has disallowed characters.',
+                        'error_general',
+                        400
+                    );
                 }
             }
         }
+
         foreach ($this->routes as $route) {
-            if (strtoupper($route['method']) === strtoupper($method) && $this->url_matches_route($url, $route)) {
+            if (
+                strtoupper($route['method']) === strtoupper($method) &&
+                $this->url_matches_route($url, $route)
+            ) {
                 $this->execute_callback($url, $route);
                 return;
             }
         }
-        empty(config_item('404_override')) ? show_404() : show_404('', '', config_item('404_override'));
+
+        empty(config_item('404_override'))
+            ? show_404()
+            : show_404('', '', config_item('404_override'));
     }
 
     /**
@@ -466,21 +528,21 @@ class Router
      *
      * @param mixed $param
      * @param string|null $pattern
-     * @return void
+     * @return $this
      */
     public function where($param, $pattern = null)
     {
         $last_route = end($this->routes);
 
         if ($last_route) {
-            if(is_array($param)) {
-                foreach($param as $key => $val) {
+            if (is_array($param)) {
+                foreach ($param as $key => $val) {
                     $last_route['constraints'][$key] = $val;
                 }
             } else {
                 $last_route['constraints'][$param] = $pattern;
-                
             }
+
             $this->routes[key($this->routes)] = $last_route;
         }
 
@@ -491,7 +553,7 @@ class Router
      * Numeric
      *
      * @param mixed $param
-     * @return void
+     * @return $this
      */
     public function where_number($param)
     {
@@ -502,19 +564,18 @@ class Router
      * Alpha
      *
      * @param mixed $param
-     * @return void
+     * @return $this
      */
     public function where_alpha($param)
     {
         return $this->where($param, '[a-zA-Z]+');
-
     }
 
     /**
      * Alphanumeric
      *
      * @param mixed $param
-     * @return void
+     * @return $this
      */
     public function where_alphanumeric($param)
     {
@@ -525,22 +586,28 @@ class Router
      * Uuid
      *
      * @param mixed $param
-     * @return void
+     * @return $this
      */
     public function where_uuid($param)
     {
-        return $this->where($param, '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+        return $this->where(
+            $param,
+            '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+        );
     }
 
     /**
      * Uliad
      *
      * @param mixed $param
-     * @return void
+     * @return $this
      */
     public function where_ulid($param)
     {
-        return $this->where($param, '[0-9A-HJ-NP-Za-km-z]{26}');
+        return $this->where(
+            $param,
+            '[0-9A-HJ-NP-Za-km-z]{26}'
+        );
     }
 
     /**
@@ -548,28 +615,33 @@ class Router
      *
      * @param mixed $param
      * @param array $values
-     * @return void
+     * @return $this
      */
     public function where_in($param, $values)
     {
         $pattern = '(' . implode('|', array_map('preg_quote', $values)) . ')';
+
         return $this->where($param, $pattern);
     }
 
     /**
      * Set middleware for the last defined route
+     *
      * @param mixed $middleware
-     * @return void
+     * @return $this
      */
     public function middleware($middleware)
     {
-        $index = count($this->routes) - 1; // always last route
+        $index = count($this->routes) - 1;
+
+        // always last route
         if ($index >= 0) {
             $this->routes[$index]['middleware'] = array_merge(
                 $this->routes[$index]['middleware'],
                 is_array($middleware) ? $middleware : [$middleware]
             );
         }
+
         return $this;
     }
 
@@ -577,13 +649,17 @@ class Router
      * Set name of routes
      *
      * @param string $name
-     * @return void
+     * @return $this
      */
     public function name($name)
     {
         $last_route = end($this->routes);
-        $last_route['name'] = $name;
-        $this->routes[key($this->routes)] = $last_route;
+
+        if ($last_route) {
+            $last_route['name'] = $name;
+            $this->routes[key($this->routes)] = $last_route;
+        }
+
         return $this;
     }
 
@@ -591,7 +667,7 @@ class Router
      * Get route by name
      *
      * @param string $name
-     * @return void
+     * @return array|null
      */
     public function route_name($name)
     {
@@ -600,6 +676,7 @@ class Router
                 return $route;
             }
         }
+
         return null;
     }
 
@@ -607,17 +684,19 @@ class Router
      * Check if route exist
      *
      * @param string $name_of_url
-     * @return void
+     * @return bool
      */
     public function route_exists($name_of_url)
     {
         foreach ($this->routes as $route) {
-            if ($route['name'] === $name_of_url || $route['url'] === $name_of_url) {
+            if (
+                $route['name'] === $name_of_url ||
+                $route['url'] === $name_of_url
+            ) {
                 return true;
             }
         }
+
         return false;
     }
-
 }
-?>

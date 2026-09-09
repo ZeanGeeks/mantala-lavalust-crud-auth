@@ -1,5 +1,8 @@
+
 <?php
+
 defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
+
 /**
  * ------------------------------------------------------------------
  * LavaLust - an opensource lightweight PHP MVC Framework
@@ -35,10 +38,11 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
  */
 
 /**
-* ------------------------------------------------------
-*  Class Config
-* ------------------------------------------------------
+ * ------------------------------------------------------
+ *  Class Config
+ * ------------------------------------------------------
  */
+
 class Config {
 
     /**
@@ -49,114 +53,152 @@ class Config {
     public $config = [];
 
     /**
-	 * List of all loaded config files
-	 *
-	 * @var	array
-	 */
-	public $is_loaded =	array();
-    
+     * List of all loaded config files
+     *
+     * @var array
+     */
+    public $is_loaded = array();
+
 
     public function __construct()
-	{
-		$this->config = get_config();
+    {
+        $this->config = get_config();
 
-		// Set the base_url automatically if none was provided
-		if (empty($this->config['base_url']))
-		{
-			if (isset($_SERVER['SERVER_ADDR']))
-			{
-				if (strpos($_SERVER['SERVER_ADDR'], ':') !== FALSE)
-				{
-					$server_addr = '['.$_SERVER['SERVER_ADDR'].']';
-				}
-				else
-				{
-					$server_addr = $_SERVER['SERVER_ADDR'];
-				}
+        // Set the base_url automatically if none was provided
+        if (empty($this->config['base_url']))
+        {
+            if (isset($_SERVER['SERVER_ADDR']))
+            {
+                if (strpos($_SERVER['SERVER_ADDR'], ':') !== FALSE)
+                {
+                    $server_addr = '[' . $_SERVER['SERVER_ADDR'] . ']';
+                }
+                else
+                {
+                    $server_addr = $_SERVER['SERVER_ADDR'];
+                }
 
-				$base_url = (is_https() ? 'https' : 'http').'://'.$server_addr
-					.substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'], basename($_SERVER['SCRIPT_FILENAME'])));
-			}
-			else
-			{
-				$base_url = 'http://localhost/';
-			}
-			$this->set('base_url', $base_url);
-		}
+                $base_url = (is_https() ? 'https' : 'http') . '://' . $server_addr
+                    . substr(
+                        $_SERVER['SCRIPT_NAME'],
+                        0,
+                        strpos(
+                            $_SERVER['SCRIPT_NAME'],
+                            basename($_SERVER['SCRIPT_FILENAME'])
+                        )
+                    );
+            }
+            else
+            {
+                $base_url = 'http://localhost/';
+            }
 
-	}
+            $this->set('base_url', $base_url);
+        }
+    }
+
     /**
      * Load Config file
      *
      * @param mixed $file
      * @param boolean $use_sections
-     * @return void
+     * @return bool
      */
     public function load($file, $use_sections = false)
-	{
-		$file = ($file === '') ? 'config' : str_replace('.php', '', $file);
-		$loaded = false;
-		$file = is_array($file) ? $file : [$file];
+    {
+        $file = ($file === '')
+            ? 'config'
+            : str_replace('.php', '', $file);
 
-		foreach ($file as $location) {
-			$file_path = APP_DIR . 'config/' . $location . '.php';
+        $loaded = false;
 
-			if (!file_exists($file_path)) continue;
+        $file = is_array($file) ? $file : [$file];
 
-			if (in_array($file_path, $this->is_loaded, true)) return true;
+        foreach ($file as $location)
+        {
+            $file_path = APP_DIR . 'config/' . $location . '.php';
 
-			include($file_path);
+            if (!file_exists($file_path)) {
+                continue;
+            }
 
-			if (!isset($config) || !is_array($config)) {
-				continue;
-			}
+            if (in_array($file_path, $this->is_loaded, true)) {
+                return true;
+            }
 
-			if ($use_sections === true) {
-				$this->config[$location] = isset($this->config[$location])
-					? array_merge($this->config[$location], $config)
-					: $config;
-			} else {
-				$this->config = array_merge($this->config, $config);
-			}
+            include($file_path);
 
-			get_config($config);
+            if (!isset($config) || !is_array($config)) {
+                continue;
+            }
 
-			$this->is_loaded[] = $file_path;
-			$config = null;
-			$loaded = true;
-		}
+            if ($use_sections === true)
+            {
+                $this->config[$location] = isset($this->config[$location])
+                    ? array_merge($this->config[$location], $config)
+                    : $config;
+            }
+            else
+            {
+                $this->config = array_merge($this->config, $config);
+            }
 
-		if ($loaded) return true;
+            get_config($config);
 
-		show_404('', 'The configuration file ' . implode(', ', $file) . '.php does not exist.');
-	}
+            $this->is_loaded[] = $file_path;
+
+            $config = null;
+
+            $loaded = true;
+        }
+
+        if ($loaded) {
+            return true;
+        }
+
+        show_404(
+            '',
+            'The configuration file ' .
+            implode(', ', $file) .
+            '.php does not exist.'
+        );
+
+        return false;
+    }
 
     /**
-	 * Fetch a config file item
-	 *
-	 * @param	string	$item	Config item name
-	 * @param	string	$index	Index name
-	 * @return	string|null	The configuration item or NULL if the item doesn't exist
-	 */
+     * Fetch a config file item
+     *
+     * @param string $item Config item name
+     * @param string $index Index name
+     * @return mixed|null The configuration item or NULL if the item doesn't exist
+     */
     public function get($item, $index = '')
-	{
-		if ($index == '')
-		{
-			return isset($this->config[$item]) ? $this->config[$item] : NULL;
-		}
+    {
+        if ($index == '')
+        {
+            return isset($this->config[$item])
+                ? $this->config[$item]
+                : NULL;
+        }
 
-		return isset($this->config[$index], $this->config[$index][$item]) ? $this->config[$index][$item] : NULL;
-	}
+        return isset(
+            $this->config[$index],
+            $this->config[$index][$item]
+        )
+            ? $this->config[$index][$item]
+            : NULL;
+    }
 
     /**
-	 * Set a config file item
-	 *
-	 * @param	string	$item	Config item key
-	 * @param	string	$value	Config item value
-	 * @return	void
-	 */
+     * Set a config file item
+     *
+     * @param string $item Config item key
+     * @param mixed $value Config item value
+     * @return void
+     */
     public function set($item, $value)
-	{
-		$this->config[$item] = $value;
-	}
+    {
+        $this->config[$item] = $value;
+    }
 }

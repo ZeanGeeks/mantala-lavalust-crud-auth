@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ------------------------------------------------------------------
  * LavaLust - an opensource lightweight PHP MVC framework
@@ -79,13 +80,16 @@ class Middleware
 
         // Create the middleware object
         if (is_string($class)) {
+
+            // Load middleware class from app/middlewares
             if (!class_exists($class)) {
-                throw new Exception(
-                    "Middleware class [$class] not found."
-                );
+                $class = load_class($class, 'middlewares');
             }
 
-            $class = new $class();
+            // If the class is still a string, create the object
+            if (is_string($class)) {
+                $class = new $class();
+            }
         }
 
         // Make sure it has a handle() method

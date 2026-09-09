@@ -146,6 +146,7 @@ function _handlers()
  * Instantiate the config class
  */
 $config = load_class('config', 'kernel');
+$config->load('middleware');
 
 /**
  * Instantiate the logger class
