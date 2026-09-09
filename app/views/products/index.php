@@ -1,176 +1,294 @@
+
 <?php
-/** @var array $products */
+
+defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
+
+$products = $products ?? [];
+
 ?>
 
 <!DOCTYPE html>
+<html lang="en">
 
-<html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Product Management</title>
 
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 40px;
-    }
+        body {
+            margin: 0;
+            padding: 30px 20px;
+            font-family: Arial, sans-serif;
+            background: #dcecff;
+            color: #23415f;
+        }
 
-    .container {
-        max-width: 1000px;
-        margin: auto;
-        background: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+        }
 
-    h1 {
-        margin-top: 0;
-        color: #333;
-    }
+        .header {
+            background: #dcecff;
+            padding: 30px;
+            border-radius: 25px;
+            margin-bottom: 25px;
 
-    .add-button {
-        display: inline-block;
-        background: #333;
-        color: white;
-        padding: 10px 16px;
-        text-decoration: none;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
+            box-shadow:
+                12px 12px 25px rgba(80, 120, 170, 0.25),
+                -12px -12px 25px rgba(255, 255, 255, 0.8);
+        }
 
-    .add-button:hover {
-        background: #555;
-    }
+        h1 {
+            margin: 0 0 10px;
+            color: #145da0;
+        }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+        .welcome {
+            color: #64748b;
+            margin-bottom: 20px;
+        }
 
-    th {
-        background: #333;
-        color: white;
-        padding: 12px;
-        text-align: left;
-    }
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-    td {
-        padding: 12px;
-        border-bottom: 1px solid #ddd;
-    }
+        .btn {
+            display: inline-block;
+            padding: 12px 18px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: bold;
+            color: white;
+            background: #1976d2;
 
-    tr:hover {
-        background: #f8f8f8;
-    }
+            box-shadow:
+                5px 5px 10px rgba(70, 110, 160, 0.3),
+                -5px -5px 10px rgba(255, 255, 255, 0.7);
 
-    .edit {
-        color: #333;
-        text-decoration: none;
-        margin-right: 8px;
-    }
+            transition: 0.2s;
+        }
 
-    .delete {
-        color: #c0392b;
-        text-decoration: none;
-    }
+        .btn:hover {
+            transform: translateY(-2px);
+            background: #1565c0;
+        }
 
-    .edit:hover,
-    .delete:hover {
-        text-decoration: underline;
-    }
+        .logout {
+            background: #607d9b;
+        }
 
-    .empty {
-        text-align: center;
-        color: #777;
-        padding: 20px;
-    }
-</style>
+        .table-card {
+            background: #dcecff;
+            padding: 25px;
+            border-radius: 25px;
 
+            box-shadow:
+                12px 12px 25px rgba(80, 120, 170, 0.25),
+                -12px -12px 25px rgba(255, 255, 255, 0.8);
+        }
 
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            min-width: 850px;
+        }
+
+        th {
+            padding: 14px;
+            text-align: left;
+            color: #145da0;
+        }
+
+        td {
+            padding: 15px;
+            background: #dcecff;
+
+            box-shadow:
+                3px 3px 7px rgba(80, 120, 170, 0.15),
+                -3px -3px 7px rgba(255, 255, 255, 0.7);
+        }
+
+        tr td:first-child {
+            border-radius: 12px 0 0 12px;
+        }
+
+        tr td:last-child {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .edit {
+            color: #1565c0;
+            font-weight: bold;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        .delete {
+            color: #c62828;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+
+            .header,
+            .table-card {
+                padding: 20px;
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="container">
 
+    <div class="header">
 
-<h1>Product Management</h1>
+        <h1>Product Management</h1>
 
-<a href="/products/create" class="add-button">
-    + Add Product
-</a>
+        <p class="welcome">
+            Welcome,
+            <strong><?= htmlspecialchars($_SESSION['username'] ?? '') ?></strong>
+        </p>
 
-<table>
+        <div class="actions">
+            <a href="/products/create" class="btn">
+                + Add Product
+            </a>
 
-    <tr>
-        <th>ID</th>
-        <th>Product Name</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Actions</th>
-    </tr>
+            <a href="/logout" class="btn logout">
+                Logout
+            </a>
+        </div>
 
-    <?php if (!empty($products)): ?>
+    </div>
 
-        <?php foreach ($products as $product): ?>
+    <div class="table-card">
 
-        <tr>
+        <div class="table-wrapper">
 
-            <td><?= $product['id'] ?></td>
+            <table>
 
-            <td>
-                <?= htmlspecialchars($product['product_name']) ?>
-            </td>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
 
-            <td>
-                <?= htmlspecialchars($product['description']) ?>
-            </td>
+                <tbody>
 
-            <td>
-                ₱<?= number_format($product['price'], 2) ?>
-            </td>
+                <?php if (empty($products)): ?>
 
-            <td>
-                <?= $product['quantity'] ?>
-            </td>
+                    <tr>
+                        <td colspan="7" class="empty">
+                            No products found.
+                        </td>
+                    </tr>
 
-            <td>
-                <a
-                    href="/products/edit/<?= $product['id'] ?>"
-                    class="edit"
-                >
-                    Edit
-                </a>
+                <?php else: ?>
 
-                <a
-                    href="/products/delete/<?= $product['id'] ?>"
-                    class="delete"
-                    onclick="return confirm('Delete this product?')"
-                >
-                    Delete
-                </a>
-            </td>
+                    <?php foreach ($products as $product): ?>
 
-        </tr>
+                        <tr>
 
-        <?php endforeach; ?>
+                            <td>
+                                <?= htmlspecialchars($product['id']) ?>
+                            </td>
 
-    <?php else: ?>
+                            <td>
+                                <?= htmlspecialchars($product['product_name']) ?>
+                            </td>
 
-        <tr>
-            <td colspan="6" class="empty">
-                No products found.
-            </td>
-        </tr>
+                            <td>
+                                <?= htmlspecialchars($product['description']) ?>
+                            </td>
 
-    <?php endif; ?>
+                            <td>
+                                ₱<?= htmlspecialchars($product['price']) ?>
+                            </td>
 
-</table>
+                            <td>
+                                <?= htmlspecialchars($product['quantity']) ?>
+                            </td>
 
+                            <td>
+                                <?= htmlspecialchars($product['created_at']) ?>
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="/products/edit/<?= (int) $product['id'] ?>"
+                                    class="edit"
+                                >
+                                    Edit
+                                </a>
+
+                                <a
+                                    href="/products/delete/<?= (int) $product['id'] ?>"
+                                    class="delete"
+                                    onclick="return confirm('Are you sure you want to delete this product?')"
+                                >
+                                    Delete
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    <?php endforeach; ?>
+
+                <?php endif; ?>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
 
 </div>
 

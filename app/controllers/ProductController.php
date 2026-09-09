@@ -1,4 +1,6 @@
+
 <?php
+
 defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
 
 class ProductController extends Controller
@@ -26,15 +28,16 @@ class ProductController extends Controller
     public function store()
     {
         $data = [
-            'product_name' => $_POST['product_name'],
-            'description'  => $_POST['description'],
-            'price'        => $_POST['price'],
-            'quantity'     => $_POST['quantity']
+            'product_name' => $_POST['product_name'] ?? '',
+            'description'  => $_POST['description'] ?? '',
+            'price'        => $_POST['price'] ?? 0,
+            'quantity'     => $_POST['quantity'] ?? 0
         ];
 
         $this->ProductModel->createProduct($data);
 
         redirect('/products');
+        exit;
     }
 
     public function edit(int $id)
@@ -47,15 +50,16 @@ class ProductController extends Controller
     public function update(int $id)
     {
         $data = [
-            'product_name' => $_POST['product_name'],
-            'description'  => $_POST['description'],
-            'price'        => $_POST['price'],
-            'quantity'     => $_POST['quantity']
+            'product_name' => $_POST['product_name'] ?? '',
+            'description'  => $_POST['description'] ?? '',
+            'price'        => $_POST['price'] ?? 0,
+            'quantity'     => $_POST['quantity'] ?? 0
         ];
 
         $this->ProductModel->updateProduct($id, $data);
 
         redirect('/products');
+        exit;
     }
 
     public function delete(int $id)
@@ -63,5 +67,6 @@ class ProductController extends Controller
         $this->ProductModel->deleteProduct($id);
 
         redirect('/products');
+        exit;
     }
 }

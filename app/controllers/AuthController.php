@@ -9,34 +9,41 @@ class AuthController extends Controller
     {
         parent::__construct();
 
-        // Start session only if it has not started
-        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        // Start session
+        if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
-        // Load database and model
+        // Load database and UserModel
         $this->call->database();
         $this->call->model('UserModel');
     }
 
+    // Show login page
     public function login()
     {
+        if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+            redirect('/products');
+            exit;
+        }
+
         $this->call->view('auth/login');
     }
 
+    // Process login
     public function authenticate()
     {
-        $username = $_POST['username'] ?? '';
+        $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
 
-        echo "<pre>";
-        echo "STEP 1: Login request received\n";
-        echo "Username: " . htmlspecialchars($username) . "\n";
+        if ($username === '' || $password === '') {
+            $data['error'] = 'Please enter username and password.';
+            $this->call->view('auth/login', $data);
+            return;
+        }
 
+        // Get users
         $users = $this->UserModel->all();
-
-        echo "STEP 2: Users loaded\n";
-        echo "Number of users: " . count($users) . "\n";
 
         $user = null;
 
@@ -47,57 +54,41 @@ class AuthController extends Controller
             }
         }
 
-        echo "STEP 3: User search completed\n";
-
-        if ($user) {
-            echo "User found: YES\n";
-            echo "Password verification: ";
-
-            if (password_verify($password, $user['password'])) {
-                echo "SUCCESS\n";
-
-                $_SESSION['logged_in'] = true;
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
-
-                echo "STEP 4: Session created\n";
-                echo "STEP 5: Redirecting to /products...\n";
-
-                redirect('/products');
-                exit;
-            } else {
-                echo "FAILED\n";
-                echo "Password does not match.\n";
-            }
-        } else {
-            echo "User found: NO\n";
-            echo "Username does not exist.\n";
+        // Username not found
+        if (!$user) {
+            $data['error'] = 'Invalid username or password.';
+            $this->call->view('auth/login', $data);
+            return;
         }
 
-        echo "</pre>";
+        // Check password
+        if (!password_verify($password, $user['password'])) {
+            $data['error'] = 'Invalid username or password.';
+            $this->call->view('auth/login', $data);
+            return;
+        }
+
+        // Create new session ID
+        session_regenerate_id(true);
+
+        // Save login information
+        $_SESSION['logged_in'] = true;
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+
+        // Go to products
+        redirect('/products');
+        exit;
     }
 
+    // Logout
     public function logout()
     {
-        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
         $_SESSION = [];
-
-        if (ini_get('session.use_cookies')) {
-            $params = session_get_cookie_params();
-
-            setcookie(
-                session_name(),
-                '',
-                time() - 42000,
-                $params['path'],
-                $params['domain'],
-                $params['secure'],
-                $params['httponly']
-            );
-        }
 
         session_destroy();
 
