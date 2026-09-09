@@ -32,43 +32,52 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
  *
  * @package LavaLust
  * @author Ronald M. Marasigan <ronald.marasigan@yahoo.com>
- * @copyright Copyright 2020 (https://ronmarasigan.github.io)
+ * @copyright Copyright 2020
  * @since Version 1
- * @link https://lavalust.pinoywap.org
- * @license https://opensource.org/licenses/MIT MIT License
+ * @license MIT License
  */
 
-if ( ! function_exists('load_class'))
+if (!function_exists('load_class'))
 {
     /**
      * Class Loader to load all classes
+     *
      * @param string $class
-     * @param string $directory Class directory
-     * @param array $params    Class parameters if present
+     * @param string $directory
+     * @param array|null $params
+     * @param string|null $object_name
      * @return object
      */
     function load_class($class, $directory = '', $params = null, $object_name = null)
     {
         $LAVA = Registry::instance();
+
         $object_name = $object_name ?? strtolower($class);
 
         // Return if already loaded
-        if ($existing = $LAVA->get_object($object_name)) {
+        if ($existing = $LAVA->get_object($object_name))
+        {
             return $existing;
         }
 
         // Search in both APP_DIR and SYSTEM_DIR
-        foreach ([APP_DIR, SYSTEM_DIR] as $base_path) {
-            $dir_path = rtrim($base_path . $directory, '/\\') . DIRECTORY_SEPARATOR;
+        foreach ([APP_DIR, SYSTEM_DIR] as $base_path)
+        {
+            $dir_path = rtrim(
+                $base_path . $directory,
+                '/\\'
+            ) . DIRECTORY_SEPARATOR;
 
-            if (!is_dir($dir_path)) {
+            if (!is_dir($dir_path))
+            {
                 continue;
             }
 
-            foreach (scandir($dir_path) as $file) {
-
+            foreach (scandir($dir_path) as $file)
+            {
                 // Case-insensitive file match
-                if (strcasecmp($file, $class . '.php') !== 0) {
+                if (strcasecmp($file, $class . '.php') !== 0)
+                {
                     continue;
                 }
 
@@ -77,24 +86,32 @@ if ( ! function_exists('load_class'))
                 // Find the actual class name in a case-insensitive way
                 $match = null;
 
-                foreach (get_declared_classes() as $declared_class) {
-                    if (strcasecmp($declared_class, $class) === 0) {
+                foreach (get_declared_classes() as $declared_class)
+                {
+                    if (strcasecmp($declared_class, $class) === 0)
+                    {
                         $match = $declared_class;
                         break;
                     }
                 }
 
-                if ($match === null) {
+                if ($match === null)
+                {
                     throw new RuntimeException(
                         "Class '{$class}' not found in file '{$file}'."
                     );
                 }
 
-                // Check if the class is a MY_ class and load it if found in APP_DIR .'kernel folder
+                // Check for MY_ subclass in app/kernel
                 $my_class = config_item('subclass_prefix') . $match;
-                $my_path  = APP_DIR . 'kernel' . DIRECTORY_SEPARATOR . $my_class . '.php';
 
-                if (file_exists($my_path)) {
+                $my_path = APP_DIR . 'kernel'
+                    . DIRECTORY_SEPARATOR
+                    . $my_class
+                    . '.php';
+
+                if (file_exists($my_path))
+                {
                     require_once $my_path;
                     $match = $my_class;
                 }
@@ -119,17 +136,18 @@ if ( ! function_exists('load_class'))
     }
 }
 
-if ( ! function_exists('loaded_class'))
+if (!function_exists('loaded_class'))
 {
     /**
      * Keeps track of loaded classes
+     *
      * @param string $class
-     * @param mixed $object_name
+     * @param string $object_name
      * @return array
      */
     function loaded_class($class = '', $object_name = '')
     {
-        static $_is_loaded = array();
+        static $_is_loaded = [];
 
         if ($class !== '')
         {
@@ -140,10 +158,11 @@ if ( ! function_exists('loaded_class'))
     }
 }
 
-if ( ! function_exists('show_404'))
+if (!function_exists('show_404'))
 {
     /**
      * 404 Error Not Found
+     *
      * @param string $heading
      * @param string $message
      * @param string $template
@@ -153,38 +172,55 @@ if ( ! function_exists('show_404'))
     {
         $errors = load_class('Errors', 'kernel');
 
-        return $errors->show_404($heading, $message, $template);
+        return $errors->show_404(
+            $heading,
+            $message,
+            $template
+        );
     }
 }
 
-if ( ! function_exists('show_error'))
+if (!function_exists('show_error'))
 {
     /**
      * Show error for debugging
+     *
      * @param string $heading
      * @param string $message
-     * @param string $code
+     * @param string $template
+     * @param int $code
      * @return string
      */
-    function show_error($heading = '', $message = '', $template = 'error_general', $code = 500)
-    {
+    function show_error(
+        $heading = '',
+        $message = '',
+        $template = 'error_general',
+        $code = 500
+    ) {
         $errors = load_class('Errors', 'kernel');
 
-        return $errors->show_error($heading, $message, $template, $code);
+        return $errors->show_error(
+            $heading,
+            $message,
+            $template,
+            $code
+        );
     }
 }
 
-if ( ! function_exists('_shutdown_handler'))
+if (!function_exists('_shutdown_handler'))
 {
     /**
      * For Debugging
+     *
      * @return void
      */
     function _shutdown_handler()
     {
         $last_error = error_get_last();
 
-        if (isset($last_error) &&
+        if (
+            isset($last_error) &&
             ($last_error['type'] & (
                 E_ERROR |
                 E_PARSE |
@@ -192,7 +228,8 @@ if ( ! function_exists('_shutdown_handler'))
                 E_CORE_WARNING |
                 E_COMPILE_ERROR |
                 E_COMPILE_WARNING
-            )))
+            ))
+        )
         {
             _error_handler(
                 $last_error['type'],
@@ -204,11 +241,12 @@ if ( ! function_exists('_shutdown_handler'))
     }
 }
 
-if ( ! function_exists('_exception_handler'))
+if (!function_exists('_exception_handler'))
 {
     /**
-     * For Debgging
-     * @param object $e
+     * For Debugging
+     *
+     * @param Throwable $e
      * @return void
      */
     function _exception_handler($e)
@@ -229,7 +267,7 @@ if ( ! function_exists('_exception_handler'))
             );
         }
 
-        if (strtolower(config_item('environment')) == 'development')
+        if (strtolower(config_item('environment')) === 'development')
         {
             $exception = load_class('Errors', 'kernel');
 
@@ -238,42 +276,49 @@ if ( ! function_exists('_exception_handler'))
     }
 }
 
-if ( ! function_exists('_error_handler'))
+if (!function_exists('_error_handler'))
 {
     /**
      * For Debugging
+     *
      * @param int $severity
      * @param string $errstr
      * @param string $errfile
      * @param int $errline
      * @return void
      */
-    function _error_handler($severity, $errstr, $errfile, $errline)
-    {
+    function _error_handler(
+        $severity,
+        $errstr,
+        $errfile,
+        $errline
+    ) {
         // Map of PHP error levels
         $error_levels = [
-            E_ERROR              => 'E_ERROR',
-            E_WARNING            => 'E_WARNING',
-            E_PARSE              => 'E_PARSE',
-            E_NOTICE             => 'E_NOTICE',
-            E_CORE_ERROR         => 'E_CORE_ERROR',
-            E_CORE_WARNING      => 'E_CORE_WARNING',
-            E_COMPILE_ERROR      => 'E_COMPILE_ERROR',
-            E_COMPILE_WARNING    => 'E_COMPILE_WARNING',
-            E_USER_ERROR          => 'E_USER_ERROR',
-            E_USER_WARNING        => 'E_USER_WARNING',
-            E_USER_NOTICE         => 'E_USER_NOTICE',
-            E_RECOVERABLE_ERROR   => 'E_RECOVERABLE_ERROR',
-            E_DEPRECATED           => 'E_DEPRECATED',
-            E_USER_DEPRECATED      => 'E_USER_DEPRECATED',
+            E_ERROR => 'E_ERROR',
+            E_WARNING => 'E_WARNING',
+            E_PARSE => 'E_PARSE',
+            E_NOTICE => 'E_NOTICE',
+            E_CORE_ERROR => 'E_CORE_ERROR',
+            E_CORE_WARNING => 'E_CORE_WARNING',
+            E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+            E_COMPILE_WARNING => 'E_COMPILE_WARNING',
+            E_USER_ERROR => 'E_USER_ERROR',
+            E_USER_WARNING => 'E_USER_WARNING',
+            E_USER_NOTICE => 'E_USER_NOTICE',
+            E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+            E_DEPRECATED => 'E_DEPRECATED',
+            E_USER_DEPRECATED => 'E_USER_DEPRECATED',
         ];
 
-        if (PHP_VERSION_ID < 80400 && defined('E_STRICT')) {
+        if (PHP_VERSION_ID < 80400 && defined('E_STRICT'))
+        {
             $error_levels[E_STRICT] = 'E_STRICT';
         }
 
         // Convert severity number to string name
-        $severity_name = $error_levels[$severity] ?? "UNKNOWN_ERROR";
+        $severity_name =
+            $error_levels[$severity] ?? 'UNKNOWN_ERROR';
 
         if (
             config_item('log_threshold') == 1 ||
@@ -291,7 +336,7 @@ if ( ! function_exists('_error_handler'))
             );
         }
 
-        if (strtolower(config_item('environment')) == 'development')
+        if (strtolower(config_item('environment')) === 'development')
         {
             $error = load_class('Errors', 'kernel');
 
@@ -305,9 +350,10 @@ if ( ! function_exists('_error_handler'))
     }
 }
 
-if (!function_exists('get_config')) {
+if (!function_exists('get_config'))
+{
     /**
-     * Returns global config array. Optionally merges new config.
+     * Returns global config array.
      *
      * @param array|null $new_config
      * @return array
@@ -316,14 +362,15 @@ if (!function_exists('get_config')) {
     {
         static $config = null;
 
-        if ($config === null) {
-
+        if ($config === null)
+        {
             // Load main config.php first
             $main_file = APP_DIR . 'config/config.php';
 
-            require_once($main_file);
+            require_once $main_file;
 
-            if (!isset($config) || !is_array($config)) {
+            if (!isset($config) || !is_array($config))
+            {
                 throw new RuntimeException(
                     'config.php must define $config array'
                 );
@@ -331,15 +378,19 @@ if (!function_exists('get_config')) {
         }
 
         // Merge new configs if provided
-        if (is_array($new_config)) {
-            $config = array_merge($config, $new_config);
+        if (is_array($new_config))
+        {
+            $config = array_merge(
+                $config,
+                $new_config
+            );
         }
 
         return $config;
     }
 }
 
-if ( ! function_exists('config_item'))
+if (!function_exists('config_item'))
 {
     /**
      * Global Function to access config
@@ -355,10 +406,10 @@ if ( ! function_exists('config_item'))
     }
 }
 
-if ( ! function_exists('autoload_config'))
+if (!function_exists('autoload_config'))
 {
     /**
-     * To access config from config config/autoload.php
+     * To access config from config/autoload.php
      *
      * @return array|null
      */
@@ -372,11 +423,6 @@ if ( ! function_exists('autoload_config'))
 
             if (isset($autoload) && is_array($autoload))
             {
-                foreach ($autoload as $key => $val)
-                {
-                    $autoload[$key] = $val;
-                }
-
                 return $autoload;
             }
         }
@@ -392,12 +438,12 @@ if ( ! function_exists('autoload_config'))
     }
 }
 
-if ( ! function_exists('database_config'))
+if (!function_exists('database_config'))
 {
     /**
-     * To access config from config config/database.php
+     * To access config from config/database.php
      *
-     * @return array<string,mixed>|null
+     * @return array|null
      */
     function database_config()
     {
@@ -409,11 +455,6 @@ if ( ! function_exists('database_config'))
 
             if (isset($database) && is_array($database))
             {
-                foreach ($database as $key => $val)
-                {
-                    $database[$key] = $val;
-                }
-
                 return $database;
             }
         }
@@ -429,10 +470,10 @@ if ( ! function_exists('database_config'))
     }
 }
 
-if ( ! function_exists('route_config'))
+if (!function_exists('route_config'))
 {
     /**
-     * To access config from config config/routes.php
+     * To access config from config/routes.php
      *
      * @return Router|null
      */
@@ -440,7 +481,8 @@ if ( ! function_exists('route_config'))
     {
         static $router;
 
-        if ($router !== null) {
+        if ($router !== null)
+        {
             return $router;
         }
 
@@ -466,7 +508,7 @@ if ( ! function_exists('route_config'))
     }
 }
 
-if ( ! function_exists('html_escape'))
+if (!function_exists('html_escape'))
 {
     /**
      * Returns HTML escaped variable.
@@ -475,7 +517,7 @@ if ( ! function_exists('html_escape'))
      * @param bool $double_encode
      * @return mixed
      */
-    function html_escape($var, $double_encode = TRUE)
+    function html_escape($var, $double_encode = true)
     {
         if (empty($var))
         {
@@ -486,7 +528,10 @@ if ( ! function_exists('html_escape'))
         {
             foreach (array_keys($var) as $key)
             {
-                $var[$key] = html_escape($var[$key], $double_encode);
+                $var[$key] = html_escape(
+                    $var[$key],
+                    $double_encode
+                );
             }
 
             return $var;
@@ -501,7 +546,7 @@ if ( ! function_exists('html_escape'))
     }
 }
 
-if ( ! function_exists('is_php'))
+if (!function_exists('is_php'))
 {
     /**
      * Is PHP Version
@@ -515,7 +560,7 @@ if ( ! function_exists('is_php'))
 
         $version = (string) $version;
 
-        if ( ! isset($_is_php[$version]))
+        if (!isset($_is_php[$version]))
         {
             $_is_php[$version] = version_compare(
                 PHP_VERSION,
@@ -528,7 +573,7 @@ if ( ! function_exists('is_php'))
     }
 }
 
-if ( ! function_exists('is_https'))
+if (!function_exists('is_https'))
 {
     /**
      * Is HTTPS?
@@ -545,23 +590,25 @@ if ( ! function_exists('is_https'))
             strtolower($_SERVER['HTTPS']) !== 'off'
         )
         {
-            return TRUE;
+            return true;
         }
-        elseif (
+
+        if (
             isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
             strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https'
         )
         {
-            return TRUE;
+            return true;
         }
-        elseif (
+
+        if (
             !empty($_SERVER['HTTP_FRONT_END_HTTPS']) &&
             strtolower($_SERVER['HTTP_FRONT_END_HTTPS']) !== 'off'
         )
         {
-            return TRUE;
+            return true;
         }
 
-        return FALSE;
+        return false;
     }
 }
