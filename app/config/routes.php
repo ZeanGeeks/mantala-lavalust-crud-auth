@@ -1,5 +1,8 @@
+
 <?php
+
 defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
+
 /**
  * ------------------------------------------------------------------
  * LavaLust - an opensource lightweight PHP MVC Framework
@@ -34,15 +37,15 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
  * @license https://opensource.org/licenses/MIT MIT License
  */
 
-/*
-| -------------------------------------------------------------------
-| URI ROUTING
-| -------------------------------------------------------------------
-| Here is where you can register web routes for your application.
-|
-*/
+/**
+ * | -------------------------------------------------------------------
+ * | URI ROUTING
+ * | -------------------------------------------------------------------
+ * | Here is where you can register web routes for your application.
+ * |
+ */
 
-/** @var object $router **/
+/** @var object $router */
 
 $router->get('/', 'Welcome::index');
 
@@ -52,5 +55,21 @@ $router->get('/student/profile', 'StudentController::profile', [
     'middleware' => ['student']
 ]);
 
-$router->get('/', 'Welcome::index');
 $router->get('/users', 'UserController::index');
+
+
+
+// PRODUCT CRUD ROUTES
+// PRODUCT CRUD ROUTES
+
+$router->get('/products', 'ProductController::index');
+
+$router->get('/products/create', 'ProductController::create');
+
+$router->post('/products/store', 'ProductController::store');
+
+$router->get('/products/edit/{id}', 'ProductController::edit');
+
+$router->post('/products/update/{id}', 'ProductController::update');
+
+$router->get('/products/delete/{id}', 'ProductController::delete');
