@@ -9,11 +9,6 @@ class AuthController extends Controller
     {
         parent::__construct();
 
-        // Start session
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         // Load database and UserModel
         $this->call->database();
         $this->call->model('UserModel');
@@ -22,7 +17,10 @@ class AuthController extends Controller
     // Show login page
     public function login()
     {
-        if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+        if (
+            isset($_SESSION['logged_in']) &&
+            $_SESSION['logged_in'] === true
+        ) {
             redirect('/products');
             exit;
         }
@@ -44,7 +42,6 @@ class AuthController extends Controller
 
         // Get users
         $users = $this->UserModel->all();
-
         $user = null;
 
         foreach ($users as $row) {
@@ -84,10 +81,6 @@ class AuthController extends Controller
     // Logout
     public function logout()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         $_SESSION = [];
 
         session_destroy();
