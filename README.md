@@ -287,3 +287,4 @@ LavaLust Framework is open-source software licensed under the **[MIT License](ht
 # mantala-zean-lavalust
 # mantala-zeanrollin-lavalust
 # mantala-zean-navicat-aiven
+# mantala-lavalust-crud-authentication
