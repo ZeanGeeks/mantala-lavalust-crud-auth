@@ -7,10 +7,7 @@ class AuthMiddleware
 {
     public function handle(Closure $next)
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
+        // Check login session
         if (
             !isset($_SESSION['logged_in']) ||
             $_SESSION['logged_in'] !== true
