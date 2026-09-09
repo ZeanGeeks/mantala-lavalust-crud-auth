@@ -9,12 +9,14 @@ class AuthController extends Controller
     {
         parent::__construct();
 
-        $this->call->database();
-        $this->call->model('UserModel');
-
+        // Start session FIRST
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+
+        // Load database and model AFTER session
+        $this->call->database();
+        $this->call->model('UserModel');
     }
 
     public function login()
