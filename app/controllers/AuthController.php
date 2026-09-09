@@ -1,3 +1,4 @@
+
 <?php
 
 defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
@@ -58,9 +59,7 @@ class AuthController extends Controller
             return;
         }
 
-        // Session is automatically started by PHP
-        session_regenerate_id(true);
-
+        // Set login session
         $_SESSION['logged_in'] = true;
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
