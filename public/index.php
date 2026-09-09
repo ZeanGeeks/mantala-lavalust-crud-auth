@@ -1,19 +1,36 @@
 
 <?php
 
-// Start output buffering before anything else
+/**
+ * ---------------------------------------------------------------
+ * OUTPUT BUFFERING
+ * ---------------------------------------------------------------
+ */
 ob_start();
 
+/**
+ * ---------------------------------------------------------------
+ * ERROR REPORTING
+ * ---------------------------------------------------------------
+ */
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 
+/**
+ * ---------------------------------------------------------------
+ * PREVENT DIRECT ACCESS
+ * ---------------------------------------------------------------
+ */
 define('PREVENT_DIRECT_ACCESS', TRUE);
 
 /**
  * ---------------------------------------------------------------
  * START PHP SESSION
  * ---------------------------------------------------------------
+ *
+ * Start the session before LavaLust loads controllers,
+ * middleware, views, or other application output.
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -58,7 +75,14 @@ define('PUBLIC_DIR', $public_folder);
 
 /**
  * ------------------------------------------------------
- * Setup done? Then Hurray!
+ * Load LavaLust
  * ------------------------------------------------------
  */
 require_once SYSTEM_DIR . 'kernel/LavaLust.php';
+
+/**
+ * ---------------------------------------------------------------
+ * SEND BUFFERED OUTPUT
+ * ---------------------------------------------------------------
+ */
+ob_end_flush();
