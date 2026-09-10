@@ -9,11 +9,7 @@ class AuthController extends Controller
     {
         parent::__construct();
 
-        // Start session manually
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
+        // Database and UserModel
         $this->call->database();
         $this->call->model('UserModel');
     }
@@ -89,11 +85,6 @@ class AuthController extends Controller
 
     public function logout()
     {
-        // Start session if needed
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         // Clear session data
         $_SESSION = [];
 
