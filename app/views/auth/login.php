@@ -29,7 +29,6 @@
             padding: 40px 35px;
             background: #dcecff;
             border-radius: 25px;
-
             box-shadow:
                 12px 12px 25px rgba(80, 120, 170, 0.25),
                 -12px -12px 25px rgba(255, 255, 255, 0.8);
@@ -39,16 +38,13 @@
             width: 80px;
             height: 80px;
             margin: 0 auto 20px;
-
             display: flex;
             justify-content: center;
             align-items: center;
-
             border-radius: 50%;
             font-size: 32px;
             font-weight: bold;
             color: #1769aa;
-
             box-shadow:
                 inset 5px 5px 10px rgba(100, 140, 190, 0.2),
                 inset -5px -5px 10px rgba(255, 255, 255, 0.8);
@@ -84,13 +80,10 @@
             padding: 14px 16px;
             border: none;
             outline: none;
-
             border-radius: 15px;
             background: #dcecff;
-
             color: #1e3a5f;
             font-size: 15px;
-
             box-shadow:
                 inset 5px 5px 10px rgba(100, 140, 190, 0.22),
                 inset -5px -5px 10px rgba(255, 255, 255, 0.8);
@@ -106,22 +99,16 @@
         .login-button {
             width: 100%;
             padding: 14px;
-
             border: none;
             border-radius: 15px;
-
             background: #1976d2;
             color: white;
-
             font-size: 16px;
             font-weight: bold;
-
             cursor: pointer;
-
             box-shadow:
                 6px 6px 12px rgba(70, 110, 160, 0.3),
                 -5px -5px 10px rgba(255, 255, 255, 0.7);
-
             transition: 0.2s;
         }
 
@@ -132,7 +119,6 @@
 
         .login-button:active {
             transform: translateY(1px);
-
             box-shadow:
                 inset 4px 4px 8px rgba(0, 0, 0, 0.15),
                 inset -4px -4px 8px rgba(255, 255, 255, 0.15);
@@ -141,12 +127,9 @@
         .error {
             padding: 12px;
             margin-bottom: 20px;
-
             border-radius: 12px;
-
             background: #ffe4e6;
             color: #be123c;
-
             text-align: center;
             font-size: 14px;
         }
@@ -200,7 +183,8 @@
         </div>
     <?php endif; ?>
 
-    <form action="/login/authenticate" method="POST">
+    <!-- Login now submits directly to /login -->
+    <form action="/login" method="POST">
 
         <div class="form-group">
             <label for="username">Username</label>

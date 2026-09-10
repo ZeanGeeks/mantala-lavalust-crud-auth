@@ -15,6 +15,7 @@ class AuthController extends Controller
 
     public function login()
     {
+        // Already logged in
         if (
             isset($_SESSION['logged_in']) &&
             $_SESSION['logged_in'] === true
@@ -23,11 +24,13 @@ class AuthController extends Controller
             exit;
         }
 
-        $this->call->view('auth/login');
-    }
+        // Show login page for GET request
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->call->view('auth/login');
+            return;
+        }
 
-    public function authenticate()
-    {
+        // Login authentication
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
 
@@ -54,23 +57,26 @@ class AuthController extends Controller
             }
         }
 
+        // Check username
         if (!$user) {
             $data['error'] = 'Invalid username or password.';
             $this->call->view('auth/login', $data);
             return;
         }
 
+        // Check password
         if (!password_verify($password, $user['password'])) {
             $data['error'] = 'Invalid username or password.';
             $this->call->view('auth/login', $data);
             return;
         }
 
+        // Create session
         $_SESSION['logged_in'] = true;
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
 
-        // Redirect after successful login
+        // Go directly to products
         redirect('/products');
         exit;
     }
