@@ -77,5 +77,7 @@ $router->get('/products/delete/{id}', 'ProductController::delete')
 
 // AUTHENTICATION ROUTES
 $router->get('/login', 'AuthController::login');
-$router->post('/login', 'AuthController::login');
+
+$router->post('/login/authenticate', 'AuthController::authenticate');
+
 $router->get('/logout', 'AuthController::logout');

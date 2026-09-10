@@ -9,13 +9,18 @@ class AuthController extends Controller
     {
         parent::__construct();
 
+        // Start session manually
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $this->call->database();
         $this->call->model('UserModel');
     }
 
     public function login()
     {
-        // Already logged in
+        // Redirect already logged-in users
         if (
             isset($_SESSION['logged_in']) &&
             $_SESSION['logged_in'] === true
@@ -24,22 +29,22 @@ class AuthController extends Controller
             exit;
         }
 
-        // Show login page for GET request
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->call->view('auth/login');
-            return;
-        }
+        $this->call->view('auth/login');
+    }
 
-        // Login authentication
+    public function authenticate()
+    {
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
 
+        // Check empty fields
         if ($username === '' || $password === '') {
             $data['error'] = 'Please enter username and password.';
             $this->call->view('auth/login', $data);
             return;
         }
 
+        // Get users from database
         try {
             $users = $this->UserModel->all();
         } catch (Throwable $exception) {
@@ -48,6 +53,7 @@ class AuthController extends Controller
             return;
         }
 
+        // Find username
         $user = null;
 
         foreach ($users as $row) {
@@ -57,7 +63,7 @@ class AuthController extends Controller
             }
         }
 
-        // Check username
+        // Username not found
         if (!$user) {
             $data['error'] = 'Invalid username or password.';
             $this->call->view('auth/login', $data);
@@ -71,24 +77,27 @@ class AuthController extends Controller
             return;
         }
 
-        // Create session
+        // Create login session
         $_SESSION['logged_in'] = true;
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
 
-        // Go directly to products
+        // Redirect to products
         redirect('/products');
         exit;
     }
 
     public function logout()
     {
+        // Start session if needed
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
+        // Clear session data
         $_SESSION = [];
 
+        // Remove session cookie
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
 
@@ -103,10 +112,12 @@ class AuthController extends Controller
             );
         }
 
+        // Destroy session
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_destroy();
         }
 
+        // Return to login
         redirect('/login');
         exit;
     }
