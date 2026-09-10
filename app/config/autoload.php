@@ -107,4 +107,3 @@ $autoload['models'] = array();
 |
 */
 $autoload['configs'] = array();
-?>
