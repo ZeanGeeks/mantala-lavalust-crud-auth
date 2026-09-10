@@ -9,10 +9,8 @@ class AuthController extends Controller
     {
         parent::__construct();
 
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
+        $this->call->database();
+        $this->call->model('UserModel');
     }
 
     public function login()
@@ -40,8 +38,6 @@ class AuthController extends Controller
         }
 
         try {
-            $this->call->database();
-            $this->call->model('UserModel');
             $users = $this->UserModel->all();
         } catch (Throwable $exception) {
             $data['error'] = 'Unable to connect to the database. Please try again later.';
@@ -70,7 +66,6 @@ class AuthController extends Controller
             return;
         }
 
-       
         $_SESSION['logged_in'] = true;
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
