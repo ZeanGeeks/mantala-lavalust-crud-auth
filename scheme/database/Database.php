@@ -1431,13 +1431,7 @@ class Database {
             $this->row_count = $stmt->rowCount();
             return $stmt->fetchAll($mode, ...$args);
         } catch (Exception $e) {
-            $error = load_class('Errors', 'kernel');
-            $error->show_database_error(
-                $e->getMessage(),
-                $this->get_sql ?? '',
-                $this->bind_values ?? [],
-                $e
-            );
+            throw $e;
         }
     }
 
