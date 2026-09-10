@@ -183,8 +183,7 @@
         </div>
     <?php endif; ?>
 
-    <!-- Login now submits directly to /login -->
-    <form action="/login" method="POST">
+    <form action="/login/authenticate" method="POST">
 
         <div class="form-group">
             <label for="username">Username</label>
