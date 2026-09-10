@@ -1,3 +1,4 @@
+
 <?php
 
 defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
@@ -76,7 +77,5 @@ $router->get('/products/delete/{id}', 'ProductController::delete')
 
 // AUTHENTICATION ROUTES
 $router->get('/login', 'AuthController::login');
-
-$router->post('/login/authenticate', 'AuthController::authenticate');
-
+$router->post('/login', 'AuthController::login');
 $router->get('/logout', 'AuthController::logout');
