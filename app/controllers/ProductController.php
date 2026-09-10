@@ -15,7 +15,12 @@ class ProductController extends Controller
 
     public function index()
     {
-        $data['products'] = $this->ProductModel->getAllProducts();
+        try {
+            $data['products'] = $this->ProductModel->getAllProducts();
+        } catch (Throwable $exception) {
+            $data['products'] = [];
+            $data['error'] = 'Unable to load products. Please check the database setup.';
+        }
 
         $this->call->view('products/index', $data);
     }

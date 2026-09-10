@@ -199,6 +199,12 @@ $products = $products ?? [];
 
     </div>
 
+    <?php if (!empty($error)): ?>
+        <div class="error">
+            <?= htmlspecialchars($error) ?>
+        </div>
+    <?php endif; ?>
+
     <div class="table-card">
 
         <div class="table-wrapper">
