@@ -59,7 +59,6 @@ class AuthController extends Controller
             return;
         }
 
-        // Set login session
         $_SESSION['logged_in'] = true;
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
@@ -70,6 +69,10 @@ class AuthController extends Controller
 
     public function logout()
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $_SESSION = [];
 
         if (ini_get('session.use_cookies')) {
@@ -86,7 +89,9 @@ class AuthController extends Controller
             );
         }
 
-        session_destroy();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
 
         redirect('/login');
         exit;
