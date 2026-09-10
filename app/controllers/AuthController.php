@@ -13,8 +13,6 @@ class AuthController extends Controller
             session_start();
         }
 
-        $this->call->database();
-        $this->call->model('UserModel');
     }
 
     public function login()
@@ -41,7 +39,16 @@ class AuthController extends Controller
             return;
         }
 
-        $users = $this->UserModel->all();
+        try {
+            $this->call->database();
+            $this->call->model('UserModel');
+            $users = $this->UserModel->all();
+        } catch (Throwable $exception) {
+            $data['error'] = 'Unable to connect to the database. Please try again later.';
+            $this->call->view('auth/login', $data);
+            return;
+        }
+
         $user = null;
 
         foreach ($users as $row) {
