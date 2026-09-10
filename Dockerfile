@@ -1,3 +1,4 @@
+
 FROM php:8.2-apache
 
 WORKDIR /var/www/html
@@ -30,8 +31,8 @@ RUN printf '%s\n' \
 RUN a2enconf lavalust
 
 # PHP session configuration
+# Session starts manually in the application
 RUN printf '%s\n' \
-    'session.auto_start=1' \
     'session.save_path=/tmp' \
     'session.use_strict_mode=1' \
     'session.cookie_httponly=1' \
