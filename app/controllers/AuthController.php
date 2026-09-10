@@ -9,6 +9,10 @@ class AuthController extends Controller
     {
         parent::__construct();
 
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $this->call->database();
         $this->call->model('UserModel');
     }
@@ -59,6 +63,7 @@ class AuthController extends Controller
             return;
         }
 
+       
         $_SESSION['logged_in'] = true;
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
